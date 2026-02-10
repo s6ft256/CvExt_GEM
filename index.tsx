@@ -3,14 +3,29 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error("Could not find root element to mount to");
-}
+const mountApp = () => {
+  const rootElement = document.getElementById('root');
+  if (!rootElement) {
+    console.error("Target container 'root' not found. Retrying...");
+    setTimeout(mountApp, 100);
+    return;
+  }
 
-const root = createRoot(rootElement);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+  try {
+    const root = createRoot(rootElement);
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+    console.log("TGC App mounted successfully.");
+  } catch (error) {
+    console.error("Failed to mount React app:", error);
+  }
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', mountApp);
+} else {
+  mountApp();
+}
