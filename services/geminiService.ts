@@ -6,13 +6,14 @@ export const screenResume = async (
   resumeText: string,
   jobReqs: JobRequirements
 ): Promise<ExtractionResult> => {
+  // Direct access to process.env.API_KEY as per system requirements
   const apiKey = process.env.API_KEY;
   
-  if (!apiKey || apiKey === "undefined" || apiKey.length < 10) {
-    throw new Error("Missing API Key. Ensure 'API_KEY' is set in Vercel settings and the app is redeployed.");
+  if (!apiKey || apiKey.trim() === "" || apiKey === "undefined") {
+    throw new Error("ENVIRONMENT_ERROR: API_KEY is missing in the browser environment. Please check your Vercel Environment Variables and ensure you have redeployed.");
   }
 
-  // Always use the required constructor format: new GoogleGenAI({ apiKey: process.env.API_KEY })
+  // Initialize with the validated key
   const ai = new GoogleGenAI({ apiKey });
   
   const response = await ai.models.generateContent({
@@ -62,6 +63,6 @@ export const screenResume = async (
     return JSON.parse(text) as ExtractionResult;
   } catch (e) {
     console.error("Failed to parse AI response:", response.text);
-    throw new Error("The AI provided an invalid data format. Please try again.");
+    throw new Error("PARSING_ERROR: The AI provided an invalid data format.");
   }
 };

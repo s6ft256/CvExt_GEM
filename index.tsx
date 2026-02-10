@@ -3,10 +3,15 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 
-// Safely define process.env for browser compatibility
+// Global shim for process.env to support browser-side environment variables
 if (typeof window !== 'undefined') {
-  (window as any).process = (window as any).process || {};
-  (window as any).process.env = (window as any).process.env || {};
+  const win = window as any;
+  win.process = win.process || { env: {} };
+  win.process.env = win.process.env || {};
+  // If the bundler hasn't injected the key, we ensure it's at least an empty string to avoid crashes
+  if (win.process.env.API_KEY === undefined) {
+    win.process.env.API_KEY = ""; 
+  }
 }
 
 const mountApp = () => {
