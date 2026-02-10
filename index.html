@@ -13,9 +13,11 @@
     <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.2.4/",
     "react": "https://esm.sh/react@^19.2.4",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react-dom": "https://esm.sh/react-dom@^19.2.4",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react-dom/client": "https://esm.sh/react-dom@^19.2.4/client",
     "@google/genai": "https://esm.sh/@google/genai@^1.40.0"
   }
 }
@@ -43,12 +45,14 @@
         .print-hidden { display: none !important; }
         .print-only { display: block !important; }
         body { background: white; padding: 0; }
-        .shadow-xl { shadow: none !important; }
+        .shadow-xl { box-shadow: none !important; }
         table { border: 1px solid #e2e8f0; }
       }
     </style>
   </head>
   <body class="bg-[#f8fafc] text-slate-900 min-h-screen selection:bg-indigo-100 selection:text-indigo-700">
     <div id="root"></div>
+    <!-- Application Entry Point -->
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>
