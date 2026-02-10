@@ -6,7 +6,13 @@ export const screenResume = async (
   resumeText: string,
   jobReqs: JobRequirements
 ): Promise<ExtractionResult> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const apiKey = process.env.API_KEY;
+  
+  if (!apiKey) {
+    throw new Error("API_KEY is missing. Please set it in your environment variables.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
   
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
@@ -15,7 +21,7 @@ export const screenResume = async (
       Analyze the following resume text and extract key details strictly as requested.
 
       Target Certifications:
-      - NEBOSH: Look for "NEBOSH IGC", "NEBOSH NGC", or simply "NEBOSH".
+      - NEBOSH: Look for "NEBOSH IGC", "NEBOSH NGC", or "NEBOSH".
       - ADOSH/OSHAD: Look for "ADOSH", "OSHAD", or "Abu Dhabi Occupational Safety and Health".
       - LEVEL 6: Look specifically for "NVQ Level 6", "OTHM Level 6", or "NEBOSH International Diploma" (IDip).
 
@@ -47,6 +53,16 @@ export const screenResume = async (
     }
   });
 
-  const result = JSON.parse(response.text.trim());
-  return result as ExtractionResult;
+  try {
+    let text = response.text.trim();
+    // Remove potential markdown code blocks if the model includes them
+    if (text.startsWith('```')) {
+      text = text.replace(/^```json\s*/, '').replace(/```$/, '');
+    }
+    const result = JSON.parse(text);
+    return result as ExtractionResult;
+  } catch (e) {
+    console.error("Failed to parse AI response:", response.text);
+    throw new Error("The AI provided an invalid data format. Please try again.");
+  }
 };
