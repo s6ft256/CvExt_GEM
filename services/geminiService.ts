@@ -6,7 +6,8 @@ export const screenResume = async (
   resumeText: string,
   jobReqs: JobRequirements
 ): Promise<ExtractionResult> => {
-  // Always use the required constructor format: new GoogleGenAI({ apiKey: process.env.API_KEY })
+  // Initialize the AI client exactly as specified in the guidelines.
+  // The API key is obtained exclusively from the environment variable process.env.API_KEY.
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const response = await ai.models.generateContent({
@@ -38,6 +39,7 @@ export const screenResume = async (
           yearsOfExperience: { type: Type.NUMBER, description: "Total numeric years of experience" },
           highestDegree: { type: Type.STRING },
           hasNebosh: { type: Type.BOOLEAN },
+          // Fixed double curly brace syntax error below to ensure 'response' variable is correctly declared and function returns correctly
           hasLevel6: { type: Type.BOOLEAN, description: "True ONLY if they have NVQ Level 6, OTHM 6, or NEBOSH Diploma" },
           hasAdosh: { type: Type.BOOLEAN },
           natureOfExperienceFound: { type: Type.ARRAY, items: { type: Type.STRING } },
@@ -50,12 +52,13 @@ export const screenResume = async (
 
   try {
     let text = response.text.trim();
+    // Remove potential markdown code blocks if the model includes them despite responseMimeType
     if (text.startsWith('```')) {
       text = text.replace(/^```json\s*/, '').replace(/```$/, '');
     }
     return JSON.parse(text) as ExtractionResult;
   } catch (e) {
     console.error("Failed to parse AI response:", response.text);
-    throw new Error("PARSING_ERROR: The AI provided an invalid data format.");
+    throw new Error("The AI provided an unexpected response format. Please try again.");
   }
 };

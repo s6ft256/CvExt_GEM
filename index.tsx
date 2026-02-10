@@ -3,15 +3,11 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 
-// Global shim for process.env for browser-side SDK compatibility.
-// We only define it if it doesn't exist to avoid interfering with platform injection.
+// Global shim for process.env to ensure compatibility with the Google GenAI SDK in a browser environment.
 if (typeof window !== 'undefined') {
   const win = window as any;
-  if (!win.process) {
-    win.process = { env: {} };
-  } else if (!win.process.env) {
-    win.process.env = {};
-  }
+  win.process = win.process || { env: {} };
+  win.process.env = win.process.env || {};
 }
 
 const mountApp = () => {
