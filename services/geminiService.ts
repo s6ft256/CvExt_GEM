@@ -8,10 +8,11 @@ export const screenResume = async (
 ): Promise<ExtractionResult> => {
   const apiKey = process.env.API_KEY;
   
-  if (!apiKey) {
-    throw new Error("API_KEY is missing. Please set it in your environment variables.");
+  if (!apiKey || apiKey === "undefined" || apiKey.length < 10) {
+    throw new Error("Missing API Key. Ensure 'API_KEY' is set in Vercel settings and the app is redeployed.");
   }
 
+  // Always use the required constructor format: new GoogleGenAI({ apiKey: process.env.API_KEY })
   const ai = new GoogleGenAI({ apiKey });
   
   const response = await ai.models.generateContent({
@@ -55,12 +56,10 @@ export const screenResume = async (
 
   try {
     let text = response.text.trim();
-    // Remove potential markdown code blocks if the model includes them
     if (text.startsWith('```')) {
       text = text.replace(/^```json\s*/, '').replace(/```$/, '');
     }
-    const result = JSON.parse(text);
-    return result as ExtractionResult;
+    return JSON.parse(text) as ExtractionResult;
   } catch (e) {
     console.error("Failed to parse AI response:", response.text);
     throw new Error("The AI provided an invalid data format. Please try again.");

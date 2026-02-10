@@ -17,6 +17,7 @@ const App: React.FC = () => {
   const [candidates, setCandidates] = useState<CandidateResult[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const calculateDesignation = (years: number): HSEDesignation => {
     if (years >= 15) return 'HSE/Safety Manager';
@@ -42,6 +43,7 @@ const App: React.FC = () => {
 
     setIsProcessing(true);
     setUploadProgress(0);
+    setErrorMessage(null);
 
     const fileList: File[] = Array.from(files);
     const newCandidates: CandidateResult[] = [];
@@ -71,8 +73,10 @@ const App: React.FC = () => {
           timestamp: Date.now(),
           status: 'completed'
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error processing file:", file.name, error);
+        setErrorMessage(error.message || "An unexpected error occurred during processing.");
+        break;
       }
       setUploadProgress(Math.round(((i + 1) / fileList.length) * 100));
     }
@@ -168,6 +172,19 @@ const App: React.FC = () => {
       </nav>
 
       <main className="max-w-[1600px] mx-auto p-6 lg:p-12 space-y-8 flex-grow w-full">
+        {errorMessage && (
+          <div className="bg-red-50 border border-red-200 p-4 rounded-2xl flex items-start gap-3 text-red-700 animate-in fade-in slide-in-from-top-4">
+            <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+            <div className="flex-grow">
+              <p className="text-sm font-bold">Processing Error</p>
+              <p className="text-xs mt-1">{errorMessage}</p>
+            </div>
+            <button onClick={() => setErrorMessage(null)} className="text-red-400 hover:text-red-600">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+            </button>
+          </div>
+        )}
+
         {isProcessing && (
           <div className="bg-white p-6 rounded-3xl shadow-xl border border-indigo-50 animate-pulse">
              <div className="flex justify-between items-center mb-4">

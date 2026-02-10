@@ -3,18 +3,15 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 
-// Shim process.env for browser compatibility
-if (typeof window !== 'undefined' && typeof (window as any).process === 'undefined') {
-  (window as any).process = { env: {} };
+// Safely define process.env for browser compatibility
+if (typeof window !== 'undefined') {
+  (window as any).process = (window as any).process || {};
+  (window as any).process.env = (window as any).process.env || {};
 }
 
 const mountApp = () => {
   const rootElement = document.getElementById('root');
-  if (!rootElement) {
-    console.error("Target container 'root' not found. Retrying...");
-    setTimeout(mountApp, 100);
-    return;
-  }
+  if (!rootElement) return;
 
   try {
     const root = createRoot(rootElement);
@@ -23,9 +20,8 @@ const mountApp = () => {
         <App />
       </React.StrictMode>
     );
-    console.log("TGC App mounted successfully.");
   } catch (error) {
-    console.error("Failed to mount React app:", error);
+    console.error("Critical error mounting the app:", error);
   }
 };
 
