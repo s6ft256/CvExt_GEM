@@ -1,0 +1,5 @@
+{
+  "name": "ResumeScreen AI",
+  "description": "An AI-powered resume screening tool that extracts candidate info, matches against job requirements, and categorizes roles based on experience and certifications.",
+  "requestFramePermissions": []
+}
