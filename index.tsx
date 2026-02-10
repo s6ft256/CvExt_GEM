@@ -3,11 +3,19 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 
-// Global shim for process.env to ensure compatibility with the Google GenAI SDK in a browser environment.
+/**
+ * Global shim for process.env to ensure compatibility with the Google GenAI SDK.
+ * In browser environments, 'process' is not natively defined. This block ensures
+ * that any code referencing process.env.API_KEY (like the Gemini SDK) can 
+ * execute without throwing reference errors.
+ */
 if (typeof window !== 'undefined') {
   const win = window as any;
-  win.process = win.process || { env: {} };
-  win.process.env = win.process.env || {};
+  if (!win.process) {
+    win.process = { env: {} };
+  } else if (!win.process.env) {
+    win.process.env = {};
+  }
 }
 
 const mountApp = () => {

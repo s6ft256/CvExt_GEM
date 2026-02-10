@@ -6,6 +6,16 @@ export const screenResume = async (
   resumeText: string,
   jobReqs: JobRequirements
 ): Promise<ExtractionResult> => {
+  // Capture the API key and validate its presence.
+  const apiKey = process.env.API_KEY;
+
+  if (!apiKey || apiKey === "undefined" || apiKey.trim() === "") {
+    throw new Error(
+      "Configuration Error: API_KEY environment variable is missing or empty. " +
+      "Please ensure you have set the 'API_KEY' in your environment or Vercel dashboard."
+    );
+  }
+
   // Initialize the AI client exactly as specified in the guidelines.
   // The API key is obtained exclusively from the environment variable process.env.API_KEY.
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -13,7 +23,7 @@ export const screenResume = async (
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: `
-      Act as a professional HSE (Health, Safety, and Environment) Recruiter. 
+      Act as a professional HSE (Health, Safety, and Environment) Recruiter for TGC. 
       Analyze the following resume text and extract key details strictly as requested.
 
       Target Certifications:
@@ -39,7 +49,6 @@ export const screenResume = async (
           yearsOfExperience: { type: Type.NUMBER, description: "Total numeric years of experience" },
           highestDegree: { type: Type.STRING },
           hasNebosh: { type: Type.BOOLEAN },
-          // Fixed double curly brace syntax error below to ensure 'response' variable is correctly declared and function returns correctly
           hasLevel6: { type: Type.BOOLEAN, description: "True ONLY if they have NVQ Level 6, OTHM 6, or NEBOSH Diploma" },
           hasAdosh: { type: Type.BOOLEAN },
           natureOfExperienceFound: { type: Type.ARRAY, items: { type: Type.STRING } },
@@ -52,13 +61,13 @@ export const screenResume = async (
 
   try {
     let text = response.text.trim();
-    // Remove potential markdown code blocks if the model includes them despite responseMimeType
+    // Remove potential markdown code blocks if the model includes them
     if (text.startsWith('```')) {
       text = text.replace(/^```json\s*/, '').replace(/```$/, '');
     }
     return JSON.parse(text) as ExtractionResult;
   } catch (e) {
     console.error("Failed to parse AI response:", response.text);
-    throw new Error("The AI provided an unexpected response format. Please try again.");
+    throw new Error("The AI provided an unexpected response format. Please try processing the file again.");
   }
 };
