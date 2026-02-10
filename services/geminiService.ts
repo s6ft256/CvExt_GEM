@@ -6,15 +6,8 @@ export const screenResume = async (
   resumeText: string,
   jobReqs: JobRequirements
 ): Promise<ExtractionResult> => {
-  // Direct access to process.env.API_KEY as per system requirements
-  const apiKey = process.env.API_KEY;
-  
-  if (!apiKey || apiKey.trim() === "" || apiKey === "undefined") {
-    throw new Error("ENVIRONMENT_ERROR: API_KEY is missing in the browser environment. Please check your Vercel Environment Variables and ensure you have redeployed.");
-  }
-
-  // Initialize with the validated key
-  const ai = new GoogleGenAI({ apiKey });
+  // Always use the required constructor format: new GoogleGenAI({ apiKey: process.env.API_KEY })
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",

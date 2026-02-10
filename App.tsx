@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { JobRequirements, CandidateResult, HSEDesignation } from './types';
 import { extractTextFromPdf, extractTextFromTxt } from './services/pdfService';
 import { screenResume } from './services/geminiService';
@@ -18,16 +18,6 @@ const App: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [configError, setConfigError] = useState<boolean>(false);
-
-  // Check for API key on mount to warn user immediately
-  useEffect(() => {
-    const key = process.env.API_KEY;
-    if (!key || key.length < 5) {
-      setConfigError(true);
-      setErrorMessage("System configuration error: API_KEY is missing from environment. Resumes cannot be processed.");
-    }
-  }, []);
 
   const calculateDesignation = (years: number): HSEDesignation => {
     if (years >= 15) return 'HSE/Safety Manager';
@@ -166,10 +156,10 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <label className={`px-6 py-2.5 rounded-xl font-bold cursor-pointer transition-all shadow-lg flex items-center gap-2 ${configError ? 'bg-slate-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 text-white'}`}>
+            <label className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer transition-all shadow-lg flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
               Upload Resumes
-              <input type="file" multiple accept=".pdf,.txt" className="hidden" onChange={handleFileUpload} disabled={isProcessing || configError} />
+              <input type="file" multiple accept=".pdf,.txt" className="hidden" onChange={handleFileUpload} disabled={isProcessing} />
             </label>
             <button onClick={exportToExcel} disabled={candidates.length === 0} className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-emerald-600 font-bold text-xs disabled:opacity-30">EXCEL</button>
             <button onClick={downloadPdf} disabled={candidates.length === 0} className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-indigo-600 font-bold text-xs disabled:opacity-30">PDF</button>
@@ -179,27 +169,15 @@ const App: React.FC = () => {
 
       <main className="max-w-[1600px] mx-auto p-6 lg:p-12 space-y-8 flex-grow w-full">
         {errorMessage && (
-          <div className={`border p-4 rounded-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-4 ${configError ? 'bg-orange-50 border-orange-200 text-orange-800' : 'bg-red-50 border-red-200 text-red-700'}`}>
+          <div className="bg-red-50 border border-red-200 p-4 rounded-2xl flex items-start gap-3 text-red-700 animate-in fade-in slide-in-from-top-4">
             <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
             <div className="flex-grow">
-              <p className="text-sm font-bold">{configError ? 'Environment Variable Required' : 'Processing Error'}</p>
+              <p className="text-sm font-bold">Processing Error</p>
               <p className="text-xs mt-1">{errorMessage}</p>
-              {configError && (
-                <div className="mt-3 bg-white/50 p-3 rounded-lg border border-orange-100 text-[11px] leading-relaxed">
-                  <p className="font-bold mb-1">How to fix:</p>
-                  <ol className="list-decimal list-inside space-y-1">
-                    <li>Go to Vercel Project Settings > Environment Variables.</li>
-                    <li>Add <b>API_KEY</b> (Value: Your Google Gemini AI Key).</li>
-                    <li><b>Redeploy</b> the project to apply changes.</li>
-                  </ol>
-                </div>
-              )}
             </div>
-            {!configError && (
-              <button onClick={() => setErrorMessage(null)} className="text-red-400 hover:text-red-600">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-              </button>
-            )}
+            <button onClick={() => setErrorMessage(null)} className="text-red-400 hover:text-red-600">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+            </button>
           </div>
         )}
 
@@ -234,7 +212,7 @@ const App: React.FC = () => {
                 {candidates.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="p-32 text-center text-slate-400 font-bold italic">
-                      No candidates processed yet. {configError ? 'Fix configuration to begin.' : 'Upload resumes to begin.'}
+                      No candidates processed yet. Upload resumes to begin.
                     </td>
                   </tr>
                 ) : (
