@@ -6,16 +6,6 @@ export const screenResume = async (
   resumeText: string,
   jobReqs: JobRequirements
 ): Promise<ExtractionResult> => {
-  // Capture the API key and validate its presence.
-  const apiKey = process.env.API_KEY;
-
-  if (!apiKey || apiKey === "undefined" || apiKey.trim() === "") {
-    throw new Error(
-      "Configuration Error: API_KEY environment variable is missing or empty. " +
-      "Please ensure you have set the 'API_KEY' in your environment or Vercel dashboard."
-    );
-  }
-
   // Initialize the AI client exactly as specified in the guidelines.
   // The API key is obtained exclusively from the environment variable process.env.API_KEY.
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -61,7 +51,7 @@ export const screenResume = async (
 
   try {
     let text = response.text.trim();
-    // Remove potential markdown code blocks if the model includes them
+    // Remove potential markdown code blocks if the model includes them despite responseMimeType
     if (text.startsWith('```')) {
       text = text.replace(/^```json\s*/, '').replace(/```$/, '');
     }

@@ -5,9 +5,8 @@ import App from './App';
 
 /**
  * Global shim for process.env to ensure compatibility with the Google GenAI SDK.
- * In browser environments, 'process' is not natively defined. This block ensures
- * that any code referencing process.env.API_KEY (like the Gemini SDK) can 
- * execute without throwing reference errors.
+ * This ensures that if the bundler hasn't provided a global 'process' object,
+ * the SDK won't crash when trying to access process.env.API_KEY.
  */
 if (typeof window !== 'undefined') {
   const win = window as any;
